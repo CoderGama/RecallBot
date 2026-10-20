@@ -17,3 +17,22 @@ htmlcov/
 *.log
 .DS_Store
 Thumbs.db
+# Python virtual environments
+.venv/
+.venv_clean/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Environment variables
+.env
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Debug logs
+*.log

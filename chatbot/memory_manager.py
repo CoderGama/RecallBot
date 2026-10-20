@@ -29,7 +29,7 @@ class MemoryManager:
 
     def add_memory(self, record: dict[str, Any], skip_duplicate: bool = True) -> dict[str, Any]:
         if skip_duplicate:
-            duplicate = self.find_duplicate(record.get("fact_text", ""))
+            duplicate = self.find_duplicate_record(record)
             if duplicate:
                 return {"id": duplicate["id"], "status": "duplicate", "memory": duplicate}
         memory_id = self.sqlite.insert_memory(record)
@@ -43,6 +43,25 @@ class MemoryManager:
                 "sync_error": str(exc),
             }
         return {"id": memory_id, "status": record.get("status", MEMORY_STATUS_ACTIVE)}
+
+    def find_duplicate_record(self, record: dict[str, Any]) -> dict[str, Any] | None:
+        """Compare atomic fact identities, never entire-message embeddings alone."""
+        attr = str(record.get("attribute") or "")
+        subject = str(record.get("subject") or "")
+        value = str(record.get("value") or "").strip().casefold()
+        polarity = str(record.get("polarity") or "affirmative").lower()
+        project = str((record.get("metadata") or {}).get("project_hint") or "").lower()
+        if not attr or not value:
+            return self.find_duplicate(record.get("fact_text", ""))
+        for old in self.sqlite.active_memories():
+            if (str(old.get("subject") or "").casefold() == subject.casefold()
+                    and str(old.get("attribute") or "").casefold() == attr.casefold()
+                    and str(old.get("value") or "").strip().casefold() == value
+                    and str(old.get("polarity") or "affirmative").lower() == polarity
+                    and str((old.get("metadata") or {}).get("project_hint") or "").lower() == project
+                    and int(old.get("is_demo") or 0) == int(record.get("is_demo") or 0)):
+                return old
+        return None
 
     def find_duplicate(self, text: str) -> dict[str, Any] | None:
         if not text:

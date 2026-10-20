@@ -100,7 +100,7 @@ def _find_frameworks(text: str) -> list[str]:
 
 def _project_hint(text: str) -> str | None:
     patterns = [
-        r"(project\s+[a-z0-9_\-]+)",
+        r"(project\s+(?!(?:to|in|with|using|is|was|for|on|from|into|and)\b)[a-z0-9_\-]+)",
         r"(the\s+[a-z0-9_\-]+\s+(?:project|app|application|chatbot|system|website))",
         r"((?:my|our)\s+(?:college\s+)?project)",
         r"\bbuilt\s+(?:a|an|the)\s+([a-z0-9_\-]+)",
@@ -155,6 +155,42 @@ def extract_entities(text: str) -> list[dict[str, str]]:
         add(date_match.group(1), "DATE")
     return entities
 
+def extract_compound_personal_facts(text):
+    import re
+
+    facts = []
+
+    name_match = re.search(
+        r"\bmy name is\s+([a-zA-Z]+)",
+        text,
+        re.IGNORECASE
+    )
+
+    if name_match:
+        facts.append({
+            "subject": "user",
+            "attribute": "name",
+            "value": name_match.group(1).strip(),
+            "confidence": 0.95,
+            "fact_type": "name",
+        })
+
+    location_match = re.search(
+        r"\bi live in\s+([a-zA-Z]+)",
+        text,
+        re.IGNORECASE
+    )
+
+    if location_match:
+        facts.append({
+            "subject": "user",
+            "attribute": "location",
+            "value": location_match.group(1).strip(),
+            "confidence": 0.95,
+            "fact_type": "location",
+        })
+
+    return facts
 
 def extract_facts(text: str) -> list[ExtractedFact]:
     prepared = preprocess_message(text)
@@ -180,7 +216,7 @@ def extract_facts(text: str) -> list[ExtractedFact]:
                 text=raw,
                 subject="user",
                 attribute=attr,
-                value=fav.group(2).strip(" ."),
+                value=re.split(r"\s+and\s+(?:i|my)\b", fav.group(2), maxsplit=1)[0].strip(" ."),
                 polarity=polarity,
                 confidence=0.9,
                 fact_type="preference",
@@ -229,7 +265,7 @@ def extract_facts(text: str) -> list[ExtractedFact]:
         r"(?:developed|built|created|wrote|coded|implemented|made)\b.{0,80}?\b(?:using|in|with|entirely using)\s+([a-z0-9\+\.#]+)",
         lower,
     )
-    mentions_using = bool(re.search(r"\b(using|uses|used|use)\b", lower))
+    mentions_using = bool(re.search(r"\b(using|uses|used|use|migrated|switched|rewrote|replaced)\b", lower))
     if languages and (lang_use or mentions_using) and not learn:
         value = languages[0]
         if lang_use:
@@ -363,7 +399,7 @@ def extract_facts(text: str) -> list[ExtractedFact]:
                 text=raw,
                 subject="user",
                 attribute="location",
-                value=live.group(1).strip(" ."),
+                value=re.split(r"\s+and\s+(?:i|my)\b", live.group(1), maxsplit=1)[0].strip(" ."),
                 polarity=polarity,
                 confidence=0.8,
                 fact_type="location",
@@ -411,3 +447,49 @@ def extract_facts(text: str) -> list[ExtractedFact]:
         seen.add(key)
         unique.append(fact)
     return unique
+from copy import copy
+
+# Preserve the existing extractor
+_original_extract_facts = extract_facts
+
+
+def extract_facts(text):
+    # Run the original extraction logic
+    facts = list(_original_extract_facts(text))
+
+    # Extract additional personal facts
+    personal_facts = extract_compound_personal_facts(text)
+
+    for item in personal_facts:
+
+        # Avoid adding the same fact twice
+        already_exists = any(
+            f.subject == item["subject"]
+            and f.attribute == item["attribute"]
+            and str(f.value).strip().rstrip(".!?").casefold()
+            == str(item["value"]).strip().rstrip(".!?").casefold()
+            for f in facts
+        )
+
+        if already_exists:
+            continue
+
+        # Reuse the existing fact object's structure
+        if not facts:
+            continue
+
+        new_fact = copy(facts[0])
+
+        new_fact.text = text
+        new_fact.subject = item["subject"]
+        new_fact.attribute = item["attribute"]
+        new_fact.value = item["value"]
+        new_fact.polarity = "affirmative"
+        new_fact.confidence = item["confidence"]
+        new_fact.fact_type = item["fact_type"]
+        new_fact.entities = []
+        new_fact.project_hint = None
+
+        facts.append(new_fact)
+
+    return facts
