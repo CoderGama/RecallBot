@@ -32,7 +32,7 @@ def render_chat(runtime: RecallBotRuntime) -> None:
         messages = runtime.sqlite.list_messages(st.session_state.conversation_id)
         for msg in messages:
             avatar = "◉" if msg["role"] == "assistant" else "○"
-            with st.chat_message(msg["role"], avatar=avatar):
+            with st.chat_message(msg["role"]):
                 st.write(msg["content"])
                 meta = loads(msg.get("metadata_json"), {})
                 if msg["role"] == "assistant" and meta:
