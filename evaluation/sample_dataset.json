@@ -1,0 +1,276 @@
+[
+  {
+    "id": "01",
+    "statement_a": "My favorite programming language is Java.",
+    "statement_b": "My favorite programming language is Python.",
+    "expected_label": "contradiction",
+    "category": "contradiction",
+    "explanation": "Same preference attribute with two mutually exclusive values."
+  },
+  {
+    "id": "02",
+    "statement_a": "I developed my college project using Java.",
+    "statement_b": "I built the same project entirely using Python.",
+    "expected_label": "contradiction",
+    "category": "contradiction",
+    "explanation": "Same project claimed to be built in two different languages without a migration cue."
+  },
+  {
+    "id": "03",
+    "statement_a": "I live in Pune.",
+    "statement_b": "I live in Mumbai.",
+    "expected_label": "contradiction",
+    "category": "contradiction",
+    "explanation": "A person cannot currently live in two different cities as a single present-tense fact."
+  },
+  {
+    "id": "04",
+    "statement_a": "My name is Asha.",
+    "statement_b": "My name is Riya.",
+    "expected_label": "contradiction",
+    "category": "contradiction",
+    "explanation": "Two different personal names for the same speaker."
+  },
+  {
+    "id": "05",
+    "statement_a": "I am 21 years old.",
+    "statement_b": "I am 18 years old.",
+    "expected_label": "contradiction",
+    "category": "contradiction",
+    "explanation": "Conflicting age values without a time-gap explanation."
+  },
+  {
+    "id": "06",
+    "statement_a": "I study computer science.",
+    "statement_b": "I am learning Python.",
+    "expected_label": "neutral",
+    "category": "neutral",
+    "explanation": "A degree subject and a skill being learned can both be true."
+  },
+  {
+    "id": "07",
+    "statement_a": "Project Alpha uses Java.",
+    "statement_b": "Project Beta uses Python.",
+    "expected_label": "neutral",
+    "category": "neutral",
+    "explanation": "Different named projects may use different languages."
+  },
+  {
+    "id": "08",
+    "statement_a": "I like tea.",
+    "statement_b": "I have an exam on Friday.",
+    "expected_label": "neutral",
+    "category": "neutral",
+    "explanation": "Unrelated personal facts."
+  },
+  {
+    "id": "09",
+    "statement_a": "I use React for the frontend.",
+    "statement_b": "The backend is written in Django.",
+    "expected_label": "neutral",
+    "category": "neutral",
+    "explanation": "Frontend and backend technologies can coexist."
+  },
+  {
+    "id": "10",
+    "statement_a": "I interned at Infosys.",
+    "statement_b": "My college is located in Pune.",
+    "expected_label": "neutral",
+    "category": "neutral",
+    "explanation": "Internship and college location are compatible."
+  },
+  {
+    "id": "11",
+    "statement_a": "I am studying computer science.",
+    "statement_b": "I study CS at college.",
+    "expected_label": "entailment",
+    "category": "entailment",
+    "explanation": "The second statement restates the same field of study.",
+    "paraphrase_query": "What is my degree subject?"
+  },
+  {
+    "id": "12",
+    "statement_a": "My favorite programming language is Java.",
+    "statement_b": "Java is the language I like most.",
+    "expected_label": "entailment",
+    "category": "entailment",
+    "explanation": "Paraphrase of the same preference.",
+    "paraphrase_query": "What is my favorite language?"
+  },
+  {
+    "id": "13",
+    "statement_a": "I built a chatbot using Streamlit.",
+    "statement_b": "My chatbot interface is implemented with Streamlit.",
+    "expected_label": "entailment",
+    "category": "entailment",
+    "explanation": "The later sentence supports the earlier technology claim."
+  },
+  {
+    "id": "14",
+    "statement_a": "I completed assignment 4.",
+    "statement_b": "Assignment 4 is already done.",
+    "expected_label": "entailment",
+    "category": "entailment",
+    "explanation": "Restatement of completion."
+  },
+  {
+    "id": "15",
+    "statement_a": "I live in Pune.",
+    "statement_b": "Pune is my current city.",
+    "expected_label": "entailment",
+    "category": "entailment",
+    "explanation": "Equivalent location statements."
+  },
+  {
+    "id": "16",
+    "statement_a": "My exam is on Monday.",
+    "statement_b": "Correction: my exam is on Tuesday.",
+    "expected_label": "correction",
+    "category": "correction",
+    "explanation": "Explicit correction marker should update the exam date."
+  },
+  {
+    "id": "17",
+    "statement_a": "The deadline is 10 October.",
+    "statement_b": "Actually, the deadline is 12 October.",
+    "expected_label": "correction",
+    "category": "correction",
+    "explanation": "'Actually' signals a correction of the stored date."
+  },
+  {
+    "id": "18",
+    "statement_a": "I submitted the report yesterday.",
+    "statement_b": "Sorry, I meant I will submit the report tomorrow.",
+    "expected_label": "correction",
+    "category": "correction",
+    "explanation": "'I meant' is an explicit repair of the previous claim."
+  },
+  {
+    "id": "19",
+    "statement_a": "My team has four members.",
+    "statement_b": "Let me correct that: my team has five members.",
+    "expected_label": "correction",
+    "category": "correction",
+    "explanation": "User explicitly asks to correct a numeric fact."
+  },
+  {
+    "id": "20",
+    "statement_a": "I use Java for this project.",
+    "statement_b": "I migrated the project to Python.",
+    "expected_label": "change_over_time",
+    "category": "change_over_time",
+    "explanation": "Migration language describes a later state, not a silent conflict."
+  },
+  {
+    "id": "21",
+    "statement_a": "My favorite language is C++.",
+    "statement_b": "I switched my favorite language to Rust.",
+    "expected_label": "change_over_time",
+    "category": "change_over_time",
+    "explanation": "'Switched' indicates a preference change over time."
+  },
+  {
+    "id": "22",
+    "statement_a": "I work with TensorFlow.",
+    "statement_b": "I moved to PyTorch last semester.",
+    "expected_label": "change_over_time",
+    "category": "change_over_time",
+    "explanation": "A later tool choice can replace an earlier one."
+  },
+  {
+    "id": "23",
+    "statement_a": "I used to live in Delhi.",
+    "statement_b": "I now live in Pune.",
+    "expected_label": "change_over_time",
+    "category": "change_over_time",
+    "explanation": "'Used to' plus 'now' describes relocation, not a logic error."
+  },
+  {
+    "id": "24",
+    "statement_a": "I have completed the project.",
+    "statement_b": "I have not completed the project.",
+    "expected_label": "contradiction",
+    "category": "negation",
+    "explanation": "Negation of the same completion claim about the same project."
+  },
+  {
+    "id": "25",
+    "statement_a": "I like Java.",
+    "statement_b": "I do not like Java.",
+    "expected_label": "contradiction",
+    "category": "negation",
+    "explanation": "Affirmation versus negation of the same preference."
+  },
+  {
+    "id": "26",
+    "statement_a": "The model is trained.",
+    "statement_b": "The model has never been trained.",
+    "expected_label": "contradiction",
+    "category": "negation",
+    "explanation": "'Never' contradicts a completed-training claim."
+  },
+  {
+    "id": "27",
+    "statement_a": "I finished the NLP assignment.",
+    "statement_b": "I didn't finish the NLP assignment.",
+    "expected_label": "contradiction",
+    "category": "negation",
+    "explanation": "Direct negation of assignment completion."
+  },
+  {
+    "id": "28",
+    "statement_a": "I built a chatbot using Java.",
+    "statement_b": "It now uses Python.",
+    "expected_label": "ambiguous",
+    "category": "ambiguous",
+    "explanation": "'It' may refer to the chatbot, but the system should ask before asserting a conflict."
+  },
+  {
+    "id": "29",
+    "statement_a": "I created a website for the college fest.",
+    "statement_b": "The app is written in Kotlin.",
+    "expected_label": "ambiguous",
+    "category": "ambiguous",
+    "explanation": "Website versus app may or may not be the same system."
+  },
+  {
+    "id": "30",
+    "statement_a": "Team A uses MongoDB.",
+    "statement_b": "They switched the database to SQLite.",
+    "expected_label": "ambiguous",
+    "category": "ambiguous",
+    "explanation": "'They' needs confirmation before treating it as the same team."
+  },
+  {
+    "id": "31",
+    "statement_a": "My capstone uses spaCy.",
+    "statement_b": "The project depends on NLTK instead.",
+    "expected_label": "ambiguous",
+    "category": "ambiguous",
+    "explanation": "Capstone and 'the project' might be the same, but this should be clarified."
+  },
+  {
+    "id": "32",
+    "statement_a": "I deployed RecallBot locally.",
+    "statement_b": "That system currently runs in the cloud.",
+    "expected_label": "ambiguous",
+    "category": "ambiguous",
+    "explanation": "'That system' is a vague reference to the earlier deployment."
+  },
+  {
+    "id": "33",
+    "statement_a": "I know SQL.",
+    "statement_b": "I also know pandas.",
+    "expected_label": "neutral",
+    "category": "neutral",
+    "explanation": "Additional skills do not contradict existing skills."
+  },
+  {
+    "id": "34",
+    "statement_a": "The presentation is on Thursday.",
+    "statement_b": "Update: the presentation is on Friday.",
+    "expected_label": "correction",
+    "category": "correction",
+    "explanation": "'Update:' is treated as an explicit correction of schedule."
+  }
+]

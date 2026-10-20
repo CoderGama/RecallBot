@@ -1,147 +1,165 @@
-# 🧠 RecallBot — Contradiction-Aware Conversational Memory Chatbot
+# RecallBot
 
-A **complete local-first NLP college project**. RecallBot extracts personal facts from conversation, stores them persistently, retrieves them across restarts, and **asks before replacing contradictory facts**. No OpenAI key, paid API, or hosted LLM required.
+An AI chatbot that remembers, connects, and clarifies.
 
-> Important: RecallBot is a **memory-focused conversational chatbot**, not an unrestricted general-purpose AI assistant. Responses use stored evidence and rules rather than generative AI. Pattern-based extraction intentionally handles a defined set of statements; some paraphrases and complex claims will not be recognized. NLI is an *optional second opinion*, never grounds for silently overwriting a fact.
+RecallBot is a **college NLP project**: a local conversational system that stores user facts, retrieves them with sentence embeddings, and flags *potential* contradictions using structured attributes, rules, and optional natural language inference (NLI). It does **not** call a paid LLM API for core chat.
 
-## Technologies used
+## Problem statement
 
-| Component | Technology | What it does |
-| --- | --- | --- |
-| Frontend | Streamlit | Chat, profile selector, memory explorer, CSV export |
-| NLP | spaCy | Tokenization, sentence splitting, optional named entity recognition |
-| Semantic similarity | Sentence Transformers `all-MiniLM-L6-v2` | Encodes memories/queries as semantic vectors |
-| Vector database | ChromaDB `PersistentClient` | Stores/queries semantic memories locally |
-| Structured data | SQLite | Facts, history, pending conflicts and conversation history |
-| NLI | Hugging Face Transformers `cross-encoder/nli-distilroberta-base` | Optional contradiction/entailment/neutral scores |
-| Analytics & export | pandas | CSV export, history table |
-| Testing | pytest | Automated behavioral tests |
-| Language | Python 3.12 compatible | App and processing pipeline |
+People say conflicting things across a conversation (“I built it in Java” later followed by “I built it in Python”). A chatbot that only appends messages cannot tell whether the user switched languages, corrected a mistake, or is talking about a different project. RecallBot treats this as an NLP problem: extract facts, retrieve related memories, estimate the relationship between two statements, and ask for clarification when confidence is low.
 
-## Quick start (Ubuntu / Windows WSL)
+## Objectives
 
-Extract the ZIP and enter its folder. For example, if you copied it to your existing Windows project folder:
+- Persist conversational facts in SQLite and a vector index.
+- Retrieve paraphrased memories with semantic similarity.
+- Detect likely contradictions without treating every wording change as a conflict.
+- Distinguish corrections, time-based changes, compatible facts, and ambiguous references.
+- Generate replies from retrieved memories and templates (no generative API required).
 
-```bash
-cd "/mnt/c/Users/mahaj/OneDrive/Documents/RecallBot"
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-python -m streamlit run app.py
+## Features
+
+- Streamlit chat UI with memory retrieval badges and contradiction cards
+- Memory dashboard (search, filter, correct, deactivate, delete)
+- Contradiction review actions that keep historical records
+- NLP insights built from live SQLite statistics
+- Demo dataset that can be reset without deleting user data
+- Offline evaluation set (34 labeled pairs) and pytest suite
+
+## NLP techniques (academic notes)
+
+**Preprocessing.** Text is Unicode-normalized and whitespace-collapsed. Negation, dates, numbers, and names are kept. Aggressive stopword removal would destroy contradiction cues such as *not* and *never*.
+
+**Named entity recognition.** spaCy’s `en_core_web_sm` is used when installed for PERSON, ORG, GPE, DATE, and related labels. Programming languages, frameworks, projects, and preferences are **not** reliably tagged by a general NER model, so RecallBot adds lexicon and pattern extractors and stores structured `(subject, attribute, value)` records.
+
+**Sentence embeddings and semantic similarity.** Production mode encodes text with Sentence Transformers `all-MiniLM-L6-v2`. Cosine similarity retrieves near-paraphrases (for example, “I am studying computer science” vs “What is my degree subject?”). Similarity is a **retrieval** signal. It is not proof of contradiction.
+
+**Coreference (limited).** Pronouns such as *it*, *that project*, and *the app* are rewritten using the most recent project-like mention. This is a **lightweight context fallback**, not full coreference resolution (no mention clustering or trained coref model).
+
+**Natural language inference.** When Hugging Face Transformers and a pretrained MNLI model load successfully, premise/hypothesis pairs are scored as contradiction, entailment, or neutral. Label IDs are mapped through `model.config.id2label` rather than assuming a fixed class order. NLI outputs are **estimates**. If the model cannot download, conservative rules still run and the UI states that advanced NLI is unavailable.
+
+**Contradiction engine.** New facts are compared with retrieved memories using attribute/value clashes, polarity (negation), distinct project names, correction markers (`Correction:`, `I meant`), and change markers (`migrated`, `switched`). Uncertain cases ask a clarifying question instead of inventing a conflict. Old facts are **superseded**, never silently erased.
+
+## System architecture
+
+```
+User message
+    → preprocess + lightweight coreference
+    → spaCy/rules NER and fact extraction
+    → embed + ChromaDB/NumPy retrieval
+    → contradiction detector (rules + optional NLI)
+    → memory policy (store / review / supersede)
+    → template response + Streamlit UI
 ```
 
-Visit **http://localhost:8501** in the browser.
+| Path | Role |
+| --- | --- |
+| `app.py` | Streamlit entry point |
+| `config.py` | Thresholds, model names, data paths |
+| `database/sqlite_manager.py` | Structured memory and logs |
+| `database/vector_store.py` | ChromaDB with NumPy cosine fallback |
+| `nlp/` | Preprocess, NER, embeddings, NLI, retrieval, contradiction |
+| `chatbot/` | Conversation and memory policies |
+| `ui/` | Chat, memory, review, insights pages |
+| `tests/` | Pytest suite (no large-model downloads) |
+| `evaluation/` | Labeled pairs and metrics script |
 
-**Alternative**: inside the project folder, `bash start.sh` creates the venv, installs missing dependencies and launches Streamlit.
+## Technology stack
 
-A Python 3.11 or 3.12 environment is recommended. A first-run internet connection is needed to download the pretrained embedding model from Hugging Face. Later runs use cached model files. **Optional** spaCy English NER model:
+- Python 3.11+ (3.11 or 3.12 recommended for spaCy / PyTorch wheels)
+- Streamlit, spaCy, Sentence Transformers, ChromaDB, Transformers, SQLite, Pandas, Pytest
 
-```bash
+Core chat **does not** require an OpenAI key. All user data stays under `data/` on disk.
+
+## Installation (Windows)
+
+In **Command Prompt** or **PowerShell**:
+
+```bat
+cd C:\Users\mahaj\OneDrive\Documents\RecallBot
+py -3.11 -m venv .venv
+.venv\Scripts\activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
 python -m spacy download en_core_web_sm
 ```
 
-Without that extra spaCy model, the built-in English tokenizer/sentence segmenter and custom fact rules work; the NLP Inspector will not show trained NER entities.
+If `py -3.11` is missing, install [Python 3.11](https://www.python.org/downloads/) and retry. Python 3.14 may not have wheels for `torch`, `spacy`, or `chromadb`; the app then uses hashed embeddings, rule-based NLI, and a NumPy vector index.
 
-Optional NLI: turn on the **Enable optional NLI model** switch in the left sidebar, then introduce a contradiction. It downloads the NLI model on first use and needs more RAM/disk space. The model makes prediction errors; **you** approve any update.
+Optional CPU PyTorch (if the default torch install fails):
 
-**WSL note:** If SQLite/ChromaDB are slow or you encounter file-lock problems while running in a OneDrive-synced Windows folder, move the project to Ubuntu's own filesystem (`~/RecallBot`) or set `RECALLBOT_DATA_DIR="$HOME/.recallbot"` before starting. Do not sync live database files with OneDrive.
-
-## Demo script for presentation
-
-```text
-You: My name is Alex and I live in Pune.
-Bot: Saved 2 new facts to long-term memory.
-You: What is my name?
-Bot: You told me your name is Alex.
-You: Where do I live?
-Bot: You told me your current city/location is Pune.
-You: I live in Mumbai.
-Bot: Possible contradiction: earlier Pune, now Mumbai. Update or keep?
-You: update
-Bot: Updated current city/location to Mumbai.
-You: Where do I live?
-Bot: You told me your current city/location is Mumbai.
-You: What do you remember about me?
-Bot: Name: Alex; Current city/location: Mumbai.
+```bat
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+pip install -r requirements.txt
 ```
 
-Reload the webpage or restart the server and ask again; facts persist in SQLite and semantic vectors in ChromaDB.
+## Run the Streamlit app
 
-Additional examples:
-
-- `My favorite color is blue.` → `What is my favorite color?`
-- `I study at MIT-WPU.` → `Where do I study?`
-- `I like cricket.` → `Do I like cricket?`
-- `I don't like cricket.` → conflicting preference, ask update/keep
-- `My project is RecallBot.` → `What is my project?`
-- `Tell me about my studies.` → similarity-based related memories if sufficiently similar
-
-## How it works
-
-```text
-Streamlit user input
-       |
-       v
-spaCy tokenizer + sentence splitter + explicit fact-pattern extractor
-       |
-       +-- Recognized fact? -- SQLite: compare same normalized attribute
-       |                        |-- duplicate -> ignore
-       |                        |-- new -> save SQLite + embed in ChromaDB
-       |                        '-- different -> optional NLI + user confirmation
-       |                                             |-- update -> supersede old
-       |                                             '-- keep -> discard new
-       |
-       '-- Question? -> direct attribute lookup in SQLite
-                            or Sentence Transformer vector similarity in ChromaDB
-                         -> grounded reply with source evidence
+```bat
+cd C:\Users\mahaj\OneDrive\Documents\RecallBot
+.venv\Scripts\activate
+streamlit run app.py
 ```
 
-Contradictions are scoped by **attribute** (`lives_in`, `favorite_color`, `likes:cricket`, ...), not naive keyword matching. Semantic search is used for recall, but **a high cosine similarity alone does not prove a contradiction**. No change to saved memories happens without a confirmation. The new fact is held in the `pending` table until you decide.
-
-### Folder structure
-
-```text
-RecallBot/
-├── app.py                     # Streamlit UI
-├── requirements.txt
-├── start.sh                   # One-command launch on Ubuntu/WSL
-├── recallbot/
-│   ├── models.py              # Fact and reply dataclasses
-│   ├── extractor.py           # spaCy + pattern recognition
-│   ├── storage.py             # SQLite persistence
-│   ├── retrieval.py           # MiniLM + ChromaDB
-│   ├── nli.py                 # Optional Hugging Face NLI
-│   └── engine.py              # Dialogue and contradiction flow
-├── tests/
-│   └── test_recallbot.py
-└── data/                      # Databases generated at runtime
-```
+Open the URL printed in the terminal (usually `http://localhost:8501`).
 
 ## Run tests
 
-```bash
-source .venv/bin/activate
-python -m pytest -q
+Tests mock/avoid large model downloads via `RECALLBOT_TEST_MODE` and `force_fallback`.
+
+```bat
+cd C:\Users\mahaj\OneDrive\Documents\RecallBot
+.venv\Scripts\activate
+pytest -q
 ```
 
-Tests use a deterministic in-memory semantic-index stub to run without downloading pretrained models. The production application uses the real ChromaDB and Sentence Transformers implementations.
+## Run evaluation
 
-## Accuracy, privacy and limitations
+```bat
+python evaluation\evaluate.py
+```
 
-- All profile facts, chat and vectors are stored under `data/` (or `RECALLBOT_DATA_DIR`); the app does not encrypt these files or implement authenticated multiuser accounts. Use on a trusted local computer; do not expose the Streamlit server to the public internet.
-- The first start downloads models; enabling NLI downloads another model. These are not paid APIs.
-- Facts are collected with explicit patterns and can be incomplete. More complex inference, multilingual conversation and open-ended generative Q&A are **not** implemented.
-- The spaCy tokenizer is always used for parsing; the trained spaCy NER model is optional and only used in NLP Inspector.
-- Contradictions are recognized when two explicit facts have the same attribute and different values. These may be updates rather than logical contradictions; the user resolves them.
-- Numerical and name value changes, nicknames, synonyms, time-dependent changes, and multi-valued attributes may need more sophisticated ontology/coreference logic.
-- Memory profiles are convenience namespaces, **not security isolation**. Do not store secrets.
-- If a model or vector DB is unavailable, the UI provides an error; tests alone do not prove that model downloads will succeed in your WSL network.
+The script uses the same detector in offline fallback mode so it does not require model downloads. **Do not quote an accuracy number unless this script has been run.** Results are written to `evaluation/last_results.json`.
+
+## Example conversations
+
+**Contradiction / clarification**  
+User: I developed my college project using Java.  
+User: I built the same project entirely using Python.  
+RecallBot asks whether the language changed, this is a correction, or it is a different project.
+
+**Compatible facts**  
+User: I study computer science.  
+User: I am learning Python.  
+No contradiction; both memories can stay active.
+
+**Question answering from memory**  
+User: What programming language did I say I used for my project?  
+RecallBot quotes the stored statement and timestamp. If nothing is similar enough: *I couldn't find a sufficiently relevant memory about that.*
+
+**Correction**  
+User: My exam is on Monday.  
+User: Correction: my exam is on Tuesday.  
+The Monday fact is marked superseded and kept in history.
+
+## Model limitations
+
+- MiniLM similarity can retrieve loosely related sentences.
+- Small MNLI models mislabel challenging pairs; rules can also over- or under-fire.
+- Lightweight coreference fails on nested or multi-entity stories.
+- The chatbot **never invents** facts that were not stored; it also cannot “understand” like a large generative model.
+- Demo data is labeled `[DEMO]` / `is_demo=1`. Use **Reset demo dataset** only after confirming the checkbox so ordinary user rows are kept.
 
 ## Troubleshooting
 
-- `python: command not found` before venv activation → use `python3 -m venv .venv`.
-- `ModuleNotFoundError` → activate venv, then `python -m pip install -r requirements.txt`.
-- `Address already in use` → use `python -m streamlit run app.py --server.port 8502`.
-- `Model download` or `SSL` errors → verify that WSL internet access works and retry; models are hosted on Hugging Face.
-- `sqlite3.OperationalError: database is locked` → move data to Linux filesystem: `export RECALLBOT_DATA_DIR="$HOME/.recallbot"`; close other app instances.
+| Issue | What to try |
+| --- | --- |
+| `spacy.load` fails | `python -m spacy download en_core_web_sm` or continue without NER (rules still extract languages/tech) |
+| Sentence Transformer download fails | Check network; app falls back to hashed-token embeddings |
+| Transformers / CUDA errors | Keep `RECALLBOT_DEVICE=cpu` (default) |
+| ChromaDB install fails on new Python | NumPy index in `data/vector_index.npz` is used automatically |
+| Duplicate or missing vectors | Memory dashboard → **Rebuild / validate vector index** |
+| Empty charts | Chat first or load demo data; metrics are live, not hardcoded |
+
+## Configuration
+
+Environment variables (optional): `RECALLBOT_EMBEDDING_MODEL`, `RECALLBOT_NLI_MODEL`, `RECALLBOT_SIM_THRESHOLD`, `RECALLBOT_TEST_MODE`. Paths are always relative to the project directory, not the current working directory of the shell.

@@ -1,0 +1,213 @@
+{
+  "accuracy": 0.5588235294117647,
+  "relaxed_accuracy": 0.5588235294117647,
+  "macro_f1": 0.48518518518518516,
+  "retrieval_precision": 1.0,
+  "retrieval_recall": 0.5,
+  "details": [
+    {
+      "id": "01",
+      "gold": "contradiction",
+      "pred": "contradiction",
+      "correct": true
+    },
+    {
+      "id": "02",
+      "gold": "contradiction",
+      "pred": "neutral",
+      "correct": false
+    },
+    {
+      "id": "03",
+      "gold": "contradiction",
+      "pred": "contradiction",
+      "correct": true
+    },
+    {
+      "id": "04",
+      "gold": "contradiction",
+      "pred": "neutral",
+      "correct": false
+    },
+    {
+      "id": "05",
+      "gold": "contradiction",
+      "pred": "contradiction",
+      "correct": true
+    },
+    {
+      "id": "06",
+      "gold": "neutral",
+      "pred": "neutral",
+      "correct": true
+    },
+    {
+      "id": "07",
+      "gold": "neutral",
+      "pred": "neutral",
+      "correct": true
+    },
+    {
+      "id": "08",
+      "gold": "neutral",
+      "pred": "neutral",
+      "correct": true
+    },
+    {
+      "id": "09",
+      "gold": "neutral",
+      "pred": "neutral",
+      "correct": true
+    },
+    {
+      "id": "10",
+      "gold": "neutral",
+      "pred": "neutral",
+      "correct": true
+    },
+    {
+      "id": "11",
+      "gold": "entailment",
+      "pred": "neutral",
+      "correct": false
+    },
+    {
+      "id": "12",
+      "gold": "entailment",
+      "pred": "neutral",
+      "correct": false
+    },
+    {
+      "id": "13",
+      "gold": "entailment",
+      "pred": "neutral",
+      "correct": false
+    },
+    {
+      "id": "14",
+      "gold": "entailment",
+      "pred": "neutral",
+      "correct": false
+    },
+    {
+      "id": "15",
+      "gold": "entailment",
+      "pred": "neutral",
+      "correct": false
+    },
+    {
+      "id": "16",
+      "gold": "correction",
+      "pred": "correction",
+      "correct": true
+    },
+    {
+      "id": "17",
+      "gold": "correction",
+      "pred": "correction",
+      "correct": true
+    },
+    {
+      "id": "18",
+      "gold": "correction",
+      "pred": "correction",
+      "correct": true
+    },
+    {
+      "id": "19",
+      "gold": "correction",
+      "pred": "correction",
+      "correct": true
+    },
+    {
+      "id": "20",
+      "gold": "change_over_time",
+      "pred": "neutral",
+      "correct": false
+    },
+    {
+      "id": "21",
+      "gold": "change_over_time",
+      "pred": "change_over_time",
+      "correct": true
+    },
+    {
+      "id": "22",
+      "gold": "change_over_time",
+      "pred": "neutral",
+      "correct": false
+    },
+    {
+      "id": "23",
+      "gold": "change_over_time",
+      "pred": "change_over_time",
+      "correct": true
+    },
+    {
+      "id": "24",
+      "gold": "contradiction",
+      "pred": "contradiction",
+      "correct": true
+    },
+    {
+      "id": "25",
+      "gold": "contradiction",
+      "pred": "contradiction",
+      "correct": true
+    },
+    {
+      "id": "26",
+      "gold": "contradiction",
+      "pred": "neutral",
+      "correct": false
+    },
+    {
+      "id": "27",
+      "gold": "contradiction",
+      "pred": "contradiction",
+      "correct": true
+    },
+    {
+      "id": "28",
+      "gold": "ambiguous",
+      "pred": "neutral",
+      "correct": false
+    },
+    {
+      "id": "29",
+      "gold": "ambiguous",
+      "pred": "neutral",
+      "correct": false
+    },
+    {
+      "id": "30",
+      "gold": "ambiguous",
+      "pred": "neutral",
+      "correct": false
+    },
+    {
+      "id": "31",
+      "gold": "ambiguous",
+      "pred": "neutral",
+      "correct": false
+    },
+    {
+      "id": "32",
+      "gold": "ambiguous",
+      "pred": "neutral",
+      "correct": false
+    },
+    {
+      "id": "33",
+      "gold": "neutral",
+      "pred": "neutral",
+      "correct": true
+    },
+    {
+      "id": "34",
+      "gold": "correction",
+      "pred": "correction",
+      "correct": true
+    }
+  ]
+}
