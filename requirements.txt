@@ -1,0 +1,8 @@
+streamlit>=1.40,<2
+spacy>=3.8,<4
+sentence-transformers>=3.4,<6
+chromadb>=1.0,<2
+transformers>=4.45,<5
+torch>=2.3,<3
+pandas>=2.2,<3
+pytest>=8,<10
